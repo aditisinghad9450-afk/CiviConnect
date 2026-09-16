@@ -1,0 +1,83 @@
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 30px;
+  background: #f4f6ff;
+}
+
+.page-title {
+  text-align: center;
+  color: #1a237e;
+  margin-bottom: 5px;
+}
+
+.page-subtitle {
+  text-align: center;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.cards-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+}
+
+.card {
+  width: 280px;
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.25);
+}
+
+.card img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
+.card h3 {
+  color: #1a237e;
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 14px;
+}
+
+.card a {
+  display: inline-block;
+  padding: 9px 14px;
+  background: #1a237e;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.card a:hover {
+  background: #303f9f;
+}
+
+/* NLP Highlight */
+.card.recommended {
+  border: 3px solid #1a237e;
+  background: #eef1ff;
+}

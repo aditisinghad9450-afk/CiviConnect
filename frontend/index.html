@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Citizen Grievance Portal</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Floating Button CSS -->
+  <style>
+    .gov-float-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 90px;
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: white;
+      font-size: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+      transition: all 0.25s ease;
+      z-index: 9999;
+    }
+
+    .gov-float-btn:hover {
+      transform: scale(1.12);
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+    }
+  </style>
+</head>
+
+<!-- SCHEMES QUICK ACCESS BOX -->
+<a href="schemes.html"
+   class="schemes-quick-box"
+   title="Browse All Government Schemes"
+   onclick="localStorage.removeItem('grievanceCategory')">
+  
+  <span class="scheme-emoji">📄</span>
+  <span>Schemes</span>
+</a>
+
+
+
+<body>
+  <div class="project-title">
+    CivicConnect – Citizen Grievance & Scheme Finder
+  </div>
+
+  <div class="overlay">
+    <div class="container">
+
+      <h1>Citizen Grievance Portal</h1>
+      <p class="subtitle">🏛️ Government of India</p>
+
+      <!-- STEP 0: Language -->
+      <div class="step" id="step-language">
+        <h2>Select Language</h2>
+        <div class="language-boxes">
+          <div role="button" onclick="selectLanguage('en')">English</div>
+          <div role="button" onclick="selectLanguage('hi')">हिन्दी</div>
+          <div role="button" onclick="selectLanguage('ta')">தமிழ்</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: Gender -->
+      <div class="step hidden" id="step-gender">
+        <h2>
+          <span>Select Your Gender</span><br>
+          <small id="gender-local"></small>
+        </h2>
+        <div class="options">
+          <button onclick="selectGender('Male')">Male</button>
+          <button onclick="selectGender('Female')">Female</button>
+          <button onclick="selectGender('Other')">Other</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Age -->
+      <div class="step hidden" id="step-age">
+        <h2>
+          <span>Select Your Age</span><br>
+          <small id="age-local"></small>
+        </h2>
+        <input type="range" min="10" max="100" value="25" id="ageRange" oninput="updateAge()">
+        <p>Age: <span id="ageValue">25</span></p>
+
+        <!-- State selection -->
+        <div class="state-select">
+          <label for="stateSelect"><strong>Select Your State</strong></label>
+          <select id="stateSelect">
+            <option value="">-- Select State --</option>
+          </select>
+        </div>
+
+        <button onclick="goToGrievance()">Next</button>
+      </div>
+
+      <!-- STEP 3: Grievance -->
+      <div class="step hidden" id="step-grievance">
+        <h2>
+          <span>Write Your Grievance</span><br>
+          <small id="grievance-local"></small>
+        </h2>
+
+        <textarea id="grievanceText" placeholder="Describe your issue here..."></textarea>
+
+        <div class="options">
+          <button class="mic-btn" onclick="startVoiceInput()">🎤 Speak</button>
+          <button onclick="submitGrievance()">Submit</button>
+        </div>
+
+        <!-- RESULT BOX -->
+        <div id="resultBox" class="result hidden">
+          <h3>Grievance Analysis</h3>
+
+          <p><strong>Status:</strong> <span id="statusText"></span></p>
+          <p><strong>Category:</strong> <span id="categoryText"></span></p>
+          <p><strong>Urgency:</strong> <span id="urgencyText"></span></p>
+          <p><strong>Population Affected:</strong> <span id="populationText"></span></p>
+          <p><strong>Recommended Action:</strong></p>
+          <p id="actionText"></p>
+
+
+        
+
+        <p id="redirectTimer" style="margin-top:10px;font-weight:600;color:#1a237e;"></p>
+
+
+          <button class="secondary" onclick="resetForm()">
+            Submit Another Grievance
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FLOATING GOV CONTACT BUTTON -->
+  <a href="gov-contacts.html" class="gov-float-btn" title="Find Nearby Government Offices">
+    🏛️
+  </a>
+
+  <script src="script.js"></script>
+</body>
+</html>

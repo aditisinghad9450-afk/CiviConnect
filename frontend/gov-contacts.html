@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Government Contacts Directory</title>
+
+<style>
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f5f7fb;
+  margin: 0;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a237e;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+select, input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 180px;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  border-left: 5px solid #1a237e;
+}
+
+.card h3 {
+  margin: 6px 0;
+  color: #1a237e;
+}
+
+.card p {
+  font-size: 14px;
+  margin: 3px 0;
+  color: #444;
+}
+
+.badge {
+  font-size: 12px;
+  background: #e3e8ff;
+  color: #1a237e;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions a {
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #1a237e;
+  color: white;
+}
+
+.back-btn {
+  display: block;
+  text-align: center;
+  margin-top: 25px;
+  text-decoration: none;
+  color: white;
+  background: #1a237e;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<header>Government Contacts Directory</header>
+<div class="subtitle" id="locationText">Detecting your location...</div>
+
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="Search office name..." />
+  
+  <select id="filterSelect">
+    <option value="all">All Departments</option>
+    <option value="water">Water</option>
+    <option value="electricity">Electricity</option>
+    <option value="health">Health</option>
+    <option value="police">Police</option>
+    <option value="municipality">Municipality</option>
+    <option value="welfare">Welfare</option>
+  </select>
+
+  <select id="languageSelect">
+    <option value="en">English</option>
+    <option value="hi">हिन्दी</option>
+    <option value="ta">தமிழ்</option>
+  </select>
+</div>
+
+<div class="contacts-grid" id="contactsGrid"></div>
+
+<a href="index.html" class="back-btn">← Back to Home</a>
+
+<script>
+// SAMPLE PAN-INDIA DATABASE (Expandable)
+const contacts = [
+  { name: "Municipal Corporation", category: "municipality", phone: "155304", address: "Local City Office" },
+
+  { name: "National Water Helpline", category: "water", phone: "1916", address: "Water Supply Support" },
+
+  { name: "Electricity Complaint Center", category: "electricity", phone: "1912", address: "Power Issue Helpline" },
+
+  { name: "Government General Hospital", category: "health", phone: "104", address: "Medical Emergency Services" },
+
+  { name: "Police Emergency Helpline", category: "police", phone: "100", address: "Law & Safety Support" },
+
+  { name: "Women Helpline (181)", category: "welfare", phone: "181", address: "Women Protection & Support" },
+
+  { name: "Child Welfare Committee", category: "welfare", phone: "1098", address: "Child Safety Services" },
+
+  { name: "Agriculture Support Center", category: "agriculture", phone: "18001801551", address: "Farmer Assistance" },
+
+  { name: "Education Helpdesk", category: "education", phone: "14455", address: "Scholarship & School Support" },
+
+  { name: "Employment Exchange", category: "business", phone: "155368", address: "Jobs & Skill Programs" },
+
+  { name: "Pension & Welfare Office", category: "welfare", phone: "14567", address: "Senior Citizen Pension Support" },
+
+  { name: "Transport Department", category: "transport", phone: "180011800", address: "Road & Transport Complaints" }
+];
+
+const grid = document.getElementById("contactsGrid");
+const filterSelect = document.getElementById("filterSelect");
+const searchInput = document.getElementById("searchInput");
+
+function renderContacts() {
+  const filter = filterSelect.value;
+  const search = searchInput.value.toLowerCase();
+
+  grid.innerHTML = "";
+
+  const filtered = contacts.filter(c => {
+    return (filter === "all" || c.category === filter) &&
+           c.name.toLowerCase().includes(search);
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = "<p style='text-align:center;color:#777;'>No results found.</p>";
+    return;
+  }
+
+  filtered.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <span class="badge">${c.category.toUpperCase()}</span>
+      <h3>${c.name}</h3>
+      <p><strong>Phone:</strong> ${c.phone}</p>
+      <p><strong>Address:</strong> ${c.address}</p>
+
+      <div class="actions">
+        <a href="tel:${c.phone}">📞 Call</a>
+        <a href="https://wa.me/${c.phone.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>
+        <a href="https://www.google.com/maps/search/${encodeURIComponent(c.name)}" target="_blank">📍 Map</a>
+        <a href="index.html?dept=${c.category}">📝 Report</a>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+filterSelect.addEventListener("change", renderContacts);
+searchInput.addEventListener("input", renderContacts);
+
+renderContacts();
+
+// LOCATION DETECTION
+navigator.geolocation?.getCurrentPosition(pos => {
+  const { latitude, longitude } = pos.coords;
+  document.getElementById("locationText").innerText =
+    `Showing national + local offices (Location detected)`;
+});
+
+// AUTO FILTER FROM HOMEPAGE PARAM
+const params = new URLSearchParams(window.location.search);
+const categoryParam = params.get("category");
+if (categoryParam) {
+  filterSelect.value = categoryParam;
+  renderContacts();
+}
+</script>
+
+</body>
+</html>
