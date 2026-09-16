@@ -983,6 +983,24 @@ if (analysis.urgency === "High") {
 
   actionText.textContent = getRecommendedAction(analysis.detectedIntent);
   populationText.textContent = analysis.populationAffected;
+    // 💾 PERSIST TO BACKEND (CivicConnect API)
+  try {
+    await fetch("https://civiconnect1.onrender.com/api/grievances", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language: userLang,
+        gender: selectedGender,
+        age: selectedAge,
+        grievanceText: grievance,
+        category: analysis.detectedIntent,
+        urgency: analysis.urgency,
+        populationAffected: analysis.populationAffected,
+      }),
+    });
+  } catch (err) {
+    console.warn("Could not save grievance to backend:", err.message);
+  }
 
   // Save detected grievance category for schemes page
 localStorage.setItem(
