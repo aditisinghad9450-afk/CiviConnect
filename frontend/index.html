@@ -112,6 +112,10 @@
           <button class="mic-btn" onclick="startVoiceInput()">🎤 Speak</button>
           <button onclick="submitGrievance()">Submit</button>
         </div>
+        
+        <p class="existing-grievance">
+          Already submitted one? <a href="track.html">Track your grievance &rarr;</a>
+        </p>
 
         <!-- RESULT BOX -->
         <div id="resultBox" class="result hidden">
@@ -123,6 +127,16 @@
           <p><strong>Population Affected:</strong> <span id="populationText"></span></p>
           <p><strong>Recommended Action:</strong></p>
           <p id="actionText"></p>
+          
+          <div id="trackingBox" class="tracking-box hidden">
+            <p class="tracking-label">Your Tracking ID</p>
+            <p id="trackingIdText" class="tracking-id"></p>
+            <p class="tracking-help">Save this ID — you'll need it to check the status of your grievance.</p>
+            <div class="tracking-actions">
+              <button type="button" class="secondary" onclick="copyTrackingId(this)">Copy ID</button>
+              <a id="trackingLink" class="track-link" href="track.html">Track status &rarr;</a>
+            </div>
+          </div>
 
 
         

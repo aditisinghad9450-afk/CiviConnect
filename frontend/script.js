@@ -1,3 +1,41 @@
+// ===== Grievance tracking helpers =====
+let currentTrackingId = null;
+
+function showTrackingId(trackingId) {
+  if (!trackingId) return;
+  currentTrackingId = trackingId;
+  const box = document.getElementById("trackingBox");
+  const text = document.getElementById("trackingIdText");
+  const link = document.getElementById("trackingLink");
+  if (!box || !text) return;
+  text.textContent = trackingId;
+  if (link) link.href = "track.html?id=" + encodeURIComponent(trackingId);
+  box.classList.remove("hidden");
+}
+
+function copyTrackingId(btn) {
+  if (!currentTrackingId) return;
+  function flash() {
+    if (!btn) return;
+    const original = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(function () { btn.textContent = original; }, 1500);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(currentTrackingId).then(flash).catch(function () {
+      window.prompt("Copy your tracking ID:", currentTrackingId);
+    });
+  } else {
+    window.prompt("Copy your tracking ID:", currentTrackingId);
+  }
+}
+
+function hideTrackingId() {
+  currentTrackingId = null;
+  const box = document.getElementById("trackingBox");
+  if (box) box.classList.add("hidden");
+}
+
 let recognition = null;
 let isListening = false;
 
@@ -984,8 +1022,9 @@ if (analysis.urgency === "High") {
   actionText.textContent = getRecommendedAction(analysis.detectedIntent);
   populationText.textContent = analysis.populationAffected;
     // 💾 PERSIST TO BACKEND (CivicConnect API)
+    // 💾 PERSIST TO BACKEND (CivicConnect API)
   try {
-    await fetch("https://civiconnect1.onrender.com/api/grievances", {
+    const saveRes = await fetch("https://civiconnect1.onrender.com/api/grievances", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -998,6 +1037,11 @@ if (analysis.urgency === "High") {
         populationAffected: analysis.populationAffected,
       }),
     });
+
+    if (saveRes.ok) {
+      const saved = await saveRes.json();
+      showTrackingId(saved.trackingId);
+    }
   } catch (err) {
     console.warn("Could not save grievance to backend:", err.message);
   }
@@ -1033,6 +1077,7 @@ const countdown = setInterval(() => {
 // Reset flow
 function resetForm() {
   if (recognition && isListening) {
+    hideTrackingId();
     recognition.stop();
     isListening = false;
   }

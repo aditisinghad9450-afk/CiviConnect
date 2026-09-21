@@ -113,28 +113,37 @@ describe("updateGrievanceStatus", () => {
   test("rejects an invalid status value", async () => {
     const req = { params: { id: "abc123" }, body: { status: "Closed" } };
     const res = mockRes();
-
     await updateGrievanceStatus(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(Grievance.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(Grievance.findById).not.toHaveBeenCalled();
   });
 
-  test("updates status when valid", async () => {
-    const updated = { _id: "abc123", status: "Resolved" };
-    Grievance.findByIdAndUpdate.mockResolvedValue(updated);
-
+  test("returns 404 when the grievance does not exist", async () => {
+    Grievance.findById.mockResolvedValue(null);
     const req = { params: { id: "abc123" }, body: { status: "Resolved" } };
     const res = mockRes();
+    await updateGrievanceStatus(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
 
+  test("updates status and appends a timeline entry when valid", async () => {
+    const doc = {
+      _id: "abc123",
+      status: "Submitted",
+      timeline: [{ status: "Submitted", changedAt: new Date() }],
+      save: jest.fn().mockResolvedValue(true),
+    };
+    Grievance.findById.mockResolvedValue(doc);
+
+    const req = { params: { id: "abc123" }, body: { status: "Resolved", note: "Fixed by the water department" } };
+    const res = mockRes();
     await updateGrievanceStatus(req, res);
 
-    expect(Grievance.findByIdAndUpdate).toHaveBeenCalledWith(
-      "abc123",
-      { status: "Resolved" },
-      { new: true, runValidators: true }
-    );
+    expect(doc.status).toBe("Resolved");
+    expect(doc.timeline).toHaveLength(2);
+    expect(doc.timeline[1].status).toBe("Resolved");
+    expect(doc.timeline[1].note).toBe("Fixed by the water department");
+    expect(doc.save).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(updated);
   });
 });

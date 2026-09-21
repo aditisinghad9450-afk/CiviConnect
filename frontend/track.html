@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Track Your Grievance — CivicConnect</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; }
+  body { min-height: 100vh; background: url("photoBGGGGGGGG.png") no-repeat center center/cover; }
+  .project-title { position: fixed; top: 2px; width: 100%; text-align: center; font-size: 28px; font-weight: 900;
+    letter-spacing: .8px; color: #6D1B1B; text-shadow: 0 3px 6px rgba(0,0,0,.3); z-index: 1000; }
+  .overlay { min-height: 100vh; background: rgba(0,0,0,.6); display: flex; align-items: center;
+    justify-content: center; padding: 70px 16px 40px; }
+  .container { background: rgba(255,255,255,.9); backdrop-filter: blur(6px); padding: 30px; width: 100%;
+    max-width: 560px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  h1 { color: #1a237e; margin-bottom: 5px; text-align: center; font-size: 26px; }
+  .subtitle { color: #555; font-size: 14px; margin-bottom: 22px; text-align: center; }
+  label { display: block; font-size: 13px; color: #333; font-weight: 600; margin-bottom: 6px; }
+  .search-row { display: flex; gap: 8px; }
+  input[type="text"] { flex: 1; padding: 12px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px;
+    letter-spacing: 1px; text-transform: uppercase; outline: none; }
+  input[type="text"]:focus { border-color: #1a237e; }
+  button { padding: 12px 22px; background: #1a237e; color: #fff; border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: pointer; }
+  button:hover:not(:disabled) { background: #303f9f; }
+  button:disabled { background: #9fa4c4; cursor: not-allowed; }
+  .hint { font-size: 12px; color: #777; margin-top: 8px; }
+  .message { margin-top: 20px; padding: 14px; border-radius: 8px; font-size: 14px; display: none; }
+  .message.error { display: block; background: #fdecea; color: #b71c1c; border: 1px solid #f5c6c2; }
+  .message.info { display: block; background: #e8eaf6; color: #1a237e; border: 1px solid #c5cae9; }
+  .result { margin-top: 24px; display: none; }
+  .result.visible { display: block; }
+  .result-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    padding-bottom: 14px; border-bottom: 1px solid #e0e0e0; }
+  .tracking-id { font-size: 17px; font-weight: 700; color: #1a237e; letter-spacing: 1px; }
+  .badge { padding: 5px 13px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  .badge.submitted { background: #e8eaf6; color: #1a237e; }
+  .badge.in-progress { background: #fff3e0; color: #e65100; }
+  .badge.resolved { background: #e8f5e9; color: #1b5e20; }
+  .field { margin-top: 16px; }
+  .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #888; font-weight: 700; }
+  .field-value { font-size: 15px; color: #222; margin-top: 3px; line-height: 1.45; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 16px; }
+  @media (max-width: 460px) { .meta-grid { grid-template-columns: 1fr 1fr; } }
+  .timeline-title { margin-top: 26px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px;
+    color: #888; font-weight: 700; }
+  .timeline { margin-top: 14px; position: relative; padding-left: 26px; }
+  .timeline::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: #d5d5d5; }
+  .t-item { position: relative; padding-bottom: 20px; }
+  .t-item:last-child { padding-bottom: 0; }
+  .t-dot { position: absolute; left: -26px; top: 2px; width: 16px; height: 16px; border-radius: 50%;
+    background: #c5cae9; border: 3px solid #fff; box-shadow: 0 0 0 1px #d5d5d5; }
+  .t-item.current .t-dot { background: #1a237e; box-shadow: 0 0 0 1px #1a237e; }
+  .t-status { font-size: 14px; font-weight: 700; color: #222; }
+  .t-date { font-size: 12px; color: #777; margin-top: 2px; }
+  .t-note { font-size: 13px; color: #444; margin-top: 5px; font-style: italic; }
+  .back-link { display: block; text-align: center; margin-top: 24px; font-size: 13px; color: #1a237e; text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="project-title">CivicConnect</div>
+  <div class="overlay">
+    <div class="container">
+      <h1>Track Your Grievance</h1>
+      <p class="subtitle">Enter the tracking ID you received when you submitted your grievance.</p>
+
+      <label for="trackingInput">Tracking ID</label>
+      <div class="search-row">
+        <input type="text" id="trackingInput" placeholder="CC-2026-XXXXXXXX" autocomplete="off" spellcheck="false" maxlength="20" />
+        <button id="trackBtn" type="button">Track</button>
+      </div>
+      <p class="hint">Example: CC-2026-K7P2XQ4M</p>
+
+      <div class="message" id="message"></div>
+
+      <div class="result" id="result">
+        <div class="result-head">
+          <span class="tracking-id" id="rTrackingId"></span>
+          <span class="badge" id="rStatus"></span>
+        </div>
+        <div class="field">
+          <div class="field-label">Grievance</div>
+          <div class="field-value" id="rText"></div>
+        </div>
+        <div class="meta-grid">
+          <div><div class="field-label">Category</div><div class="field-value" id="rCategory"></div></div>
+          <div><div class="field-label">Urgency</div><div class="field-value" id="rUrgency"></div></div>
+          <div><div class="field-label">Affected</div><div class="field-value" id="rPopulation"></div></div>
+        </div>
+        <div class="timeline-title">Status history</div>
+        <div class="timeline" id="rTimeline"></div>
+      </div>
+
+      <a class="back-link" href="index.html">&larr; Submit a new grievance</a>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = "https://civiconnect1.onrender.com";
+
+  const input = document.getElementById("trackingInput");
+  const btn = document.getElementById("trackBtn");
+  const message = document.getElementById("message");
+  const result = document.getElementById("result");
+
+  function showMessage(text, type) { message.textContent = text; message.className = "message " + type; }
+  function clearMessage() { message.textContent = ""; message.className = "message"; }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderTimeline(events) {
+    const wrap = document.getElementById("rTimeline");
+    wrap.innerHTML = "";
+    events.forEach(function (e, i) {
+      const item = document.createElement("div");
+      item.className = "t-item" + (i === events.length - 1 ? " current" : "");
+
+      const dot = document.createElement("div"); dot.className = "t-dot"; item.appendChild(dot);
+      const s = document.createElement("div"); s.className = "t-status"; s.textContent = e.status; item.appendChild(s);
+      const d = document.createElement("div"); d.className = "t-date"; d.textContent = formatDate(e.changedAt); item.appendChild(d);
+      if (e.note) {
+        const n = document.createElement("div"); n.className = "t-note"; n.textContent = e.note; item.appendChild(n);
+      }
+      wrap.appendChild(item);
+    });
+  }
+
+  function renderResult(data) {
+    document.getElementById("rTrackingId").textContent = data.trackingId;
+    const badge = document.getElementById("rStatus");
+    badge.textContent = data.status;
+    badge.className = "badge " + (data.status || "").toLowerCase().replace(/\s+/g, "-");
+    document.getElementById("rText").textContent = data.grievanceText || "—";
+    document.getElementById("rCategory").textContent = data.category || "—";
+    document.getElementById("rUrgency").textContent = data.urgency || "—";
+    document.getElementById("rPopulation").textContent = data.populationAffected || "—";
+    renderTimeline(data.timeline || []);
+    result.classList.add("visible");
+  }
+
+  async function track() {
+    const id = input.value.trim().toUpperCase();
+    result.classList.remove("visible");
+    clearMessage();
+    if (!id) { showMessage("Please enter your tracking ID.", "error"); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Checking…";
+    showMessage("Looking up your grievance… this can take up to 30 seconds the first time.", "info");
+
+    try {
+      const res = await fetch(API_BASE + "/api/grievances/track/" + encodeURIComponent(id));
+      if (res.status === 404) { showMessage("No grievance found with that tracking ID. Please check and try again.", "error"); return; }
+      if (res.status === 400) { showMessage("That doesn't look like a valid tracking ID. It should look like CC-2026-K7P2XQ4M.", "error"); return; }
+      if (!res.ok) { showMessage("Something went wrong on our side. Please try again in a moment.", "error"); return; }
+      clearMessage();
+      renderResult(await res.json());
+    } catch (err) {
+      showMessage("Couldn't reach the server. Please check your connection and try again.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Track";
+    }
+  }
+
+  btn.addEventListener("click", track);
+  input.addEventListener("keydown", function (e) { if (e.key === "Enter") track(); });
+
+  // Supports links like track.html?id=CC-2026-K7P2XQ4M
+  const preset = new URLSearchParams(window.location.search).get("id");
+  if (preset) { input.value = preset.toUpperCase(); track(); }
+</script>
+</body>
+</html>
