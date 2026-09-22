@@ -172,7 +172,15 @@
 
   // Supports links like track.html?id=CC-2026-K7P2XQ4M
   const preset = new URLSearchParams(window.location.search).get("id");
-  if (preset) { input.value = preset.toUpperCase(); track(); }
+    if (preset) {
+    input.value = preset.toUpperCase();
+    track();
+  } else {
+    try {
+      const last = localStorage.getItem("lastTrackingId");
+      if (last) input.value = last;
+    } catch (e) {}
+  }
 </script>
 </body>
 </html>

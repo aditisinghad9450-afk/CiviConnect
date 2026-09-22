@@ -11,6 +11,10 @@ function showTrackingId(trackingId) {
   text.textContent = trackingId;
   if (link) link.href = "track.html?id=" + encodeURIComponent(trackingId);
   box.classList.remove("hidden");
+  try { 
+    localStorage.setItem("lastTrackingId", trackingId); 
+  } 
+  catch (e) {}
 }
 
 function copyTrackingId(btn) {
@@ -1022,8 +1026,11 @@ if (analysis.urgency === "High") {
   actionText.textContent = getRecommendedAction(analysis.detectedIntent);
   populationText.textContent = analysis.populationAffected;
     // 💾 PERSIST TO BACKEND (CivicConnect API)
+  
     // 💾 PERSIST TO BACKEND (CivicConnect API)
-  try {
+    document.getElementById("redirectTimer").textContent =
+    "Saving your grievance and generating your tracking ID…";
+    try {
     const saveRes = await fetch("https://civiconnect1.onrender.com/api/grievances", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1056,18 +1063,30 @@ const redirectURL =
 
 const timerEl = document.getElementById("redirectTimer");
 
-let seconds = 7;
-timerEl.textContent = `Redirecting to relevant government schemes in ${seconds} seconds...`;
-
-const countdown = setInterval(() => {
-  seconds--;
+if (currentTrackingId) {
+  // Don't auto-redirect: the citizen needs time to save their tracking ID.
+  timerEl.textContent = "";
+  const schemesLink = document.createElement("a");
+  schemesLink.href = redirectURL;
+  schemesLink.className = "track-link";
+  schemesLink.textContent = "View relevant government schemes →";
+  timerEl.appendChild(schemesLink);
+} else {
+  let seconds = 7;
   timerEl.textContent = `Redirecting to relevant government schemes in ${seconds} seconds...`;
 
-  if (seconds <= 0) {
-    clearInterval(countdown);
-    window.location.href = redirectURL;
-  }
-}, 1000);
+  const countdown = setInterval(() => {
+    seconds--;
+    timerEl.textContent = `Redirecting to relevant government schemes in ${seconds} seconds...`;
+
+    if (seconds <= 0) {
+      clearInterval(countdown);
+      window.location.href = redirectURL;
+    }
+  }, 1000);
+}
+
+
 
 
 
