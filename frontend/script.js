@@ -1025,8 +1025,12 @@ if (analysis.urgency === "High") {
 
   actionText.textContent = getRecommendedAction(analysis.detectedIntent);
   populationText.textContent = analysis.populationAffected;
-    // 💾 PERSIST TO BACKEND (CivicConnect API)
-  
+    // Frontend uses INDIVIDUAL / LOCAL / MASS; the API schema expects these:
+  const POPULATION_MAP = {
+    INDIVIDUAL: "Individual",
+    LOCAL: "Local Area",
+    MASS: "Public",
+  };
     // 💾 PERSIST TO BACKEND (CivicConnect API)
     document.getElementById("redirectTimer").textContent =
     "Saving your grievance and generating your tracking ID…";
@@ -1041,7 +1045,8 @@ if (analysis.urgency === "High") {
         grievanceText: grievance,
         category: analysis.detectedIntent,
         urgency: analysis.urgency,
-        populationAffected: analysis.populationAffected,
+                populationAffected:
+          POPULATION_MAP[analysis.populationAffected] || "Individual",
       }),
     });
 
