@@ -1116,7 +1116,10 @@ function resetForm() {
 // Voice input
 function startVoiceInput() {
   if (!("webkitSpeechRecognition" in window)) {
-    alert("Voice input not supported. Please use Google Chrome.");
+        alert(
+      "Voice input isn't supported in this browser — it uses the Web Speech API, " +
+      "which Firefox doesn't implement. Please use Chrome or Edge, or type your grievance below."
+    );
     return;
   }
 
