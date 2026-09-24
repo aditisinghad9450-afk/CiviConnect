@@ -107,7 +107,33 @@
         </h2>
 
         <textarea id="grievanceText" placeholder="Describe your issue here..."></textarea>
+        gov-float-btn
+                <!-- WHERE IS THE PROBLEM -->
+        <div class="loc-block">
+          <label class="loc-heading" for="locArea">Where is the problem?</label>
 
+          <div class="loc-row">
+            <input type="text" id="locArea" placeholder="Street / area, e.g. 3rd Main Road, Sholinganallur" maxlength="200" />
+            <button type="button" class="geo-btn" id="geoBtn" onclick="useMyLocation()">📍 Use my location</button>
+          </div>
+
+          <div class="loc-row">
+            <input type="text" id="locLandmark" placeholder="Nearest landmark (optional)" maxlength="200" />
+            <input type="text" id="locPincode" placeholder="PIN code" maxlength="6" inputmode="numeric" />
+          </div>
+
+          <p class="geo-status" id="geoStatus"></p>
+
+          <label class="loc-heading" for="contactPhone">How can the department reach you? <span class="opt">(optional)</span></label>
+          <div class="loc-row">
+            <input type="tel" id="contactPhone" placeholder="Phone number" maxlength="20" />
+            <input type="email" id="contactEmail" placeholder="Email address" maxlength="120" />
+          </div>
+          <p class="privacy-note">
+            🔒 Your phone, email and exact location are shared only with the handling department — they are never shown on the public tracking page.
+          </p>
+        </div>
+        
         <div class="options">
           <button class="mic-btn" onclick="startVoiceInput()">🎤 Speak</button>
           <button onclick="submitGrievance()">Submit</button>

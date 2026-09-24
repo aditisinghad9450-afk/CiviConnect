@@ -1,4 +1,80 @@
 // ===== Grievance tracking helpers =====
+// ===== Location capture =====
+let capturedCoords = null;
+
+function useMyLocation() {
+  const btn    = document.getElementById("geoBtn");
+  const status = document.getElementById("geoStatus");
+
+  if (!navigator.geolocation) {
+    status.textContent = "This browser can't share location. Please type the area above.";
+    status.className = "geo-status err";
+    return;
+  }
+
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = "Locating…";
+  status.textContent = "Getting your location…";
+  status.className = "geo-status busy";
+
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      capturedCoords = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracyMeters: Math.round(pos.coords.accuracy),
+      };
+      status.textContent =
+        "Location captured (accurate to about " + Math.round(pos.coords.accuracy) + " m). " +
+        "Please still add a street or landmark so the crew can find the spot.";
+      status.className = "geo-status ok";
+      btn.disabled = false;
+      btn.textContent = "📍 Location captured";
+    },
+    function (err) {
+      let msg = "Couldn't get your location. Please type the area above instead.";
+      if (err.code === err.PERMISSION_DENIED) {
+        msg = "Location permission denied — no problem, just type the area above.";
+      } else if (err.code === err.TIMEOUT) {
+        msg = "Location timed out. Please type the area above instead.";
+      }
+      status.textContent = msg;
+      status.className = "geo-status err";
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function buildLocation() {
+  const area     = (document.getElementById("locArea")     || {}).value || "";
+  const landmark = (document.getElementById("locLandmark") || {}).value || "";
+  const pincode  = (document.getElementById("locPincode")  || {}).value || "";
+
+  const loc = {};
+  if (area.trim())     loc.area     = area.trim();
+  if (landmark.trim()) loc.landmark = landmark.trim();
+  if (pincode.trim())  loc.pincode  = pincode.trim();
+  if (capturedCoords) {
+    loc.lat            = capturedCoords.lat;
+    loc.lng            = capturedCoords.lng;
+    loc.accuracyMeters = capturedCoords.accuracyMeters;
+  }
+  return Object.keys(loc).length ? loc : undefined;
+}
+
+function buildContact() {
+  const phone = (document.getElementById("contactPhone") || {}).value || "";
+  const email = (document.getElementById("contactEmail") || {}).value || "";
+
+  const c = {};
+  if (phone.trim()) c.phone = phone.trim();
+  if (email.trim()) c.email = email.trim();
+  return Object.keys(c).length ? c : undefined;
+}
+
 let currentTrackingId = null;
 
 function showTrackingId(trackingId) {
@@ -1045,8 +1121,11 @@ if (analysis.urgency === "High") {
         grievanceText: grievance,
         category: analysis.detectedIntent,
         urgency: analysis.urgency,
-                populationAffected:
+                urgency: analysis.urgency,
+        populationAffected:
           POPULATION_MAP[analysis.populationAffected] || "Individual",
+        location: buildLocation(),
+        contact: buildContact(),
       }),
     });
 
@@ -1102,6 +1181,15 @@ if (currentTrackingId) {
 function resetForm() {
   if (recognition && isListening) {
     hideTrackingId();
+      capturedCoords = null;
+  ["locArea", "locLandmark", "locPincode", "contactPhone", "contactEmail"].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  const geoStatus = document.getElementById("geoStatus");
+  if (geoStatus) { geoStatus.textContent = ""; geoStatus.className = "geo-status"; }
+  const geoBtn = document.getElementById("geoBtn");
+  if (geoBtn) { geoBtn.textContent = "📍 Use my location"; geoBtn.disabled = false; }
     recognition.stop();
     isListening = false;
   }
