@@ -64,7 +64,7 @@ describe("POST /api/grievances", () => {
 
 describe("GET /api/grievances", () => {
   test("returns an empty array when none exist", async () => {
-    const res = await request(app).get("/api/grievances");
+    const res = await request(app).get("/api/grievances").set("x-admin-key","test-admin-key");
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual([]);
   });
@@ -73,7 +73,7 @@ describe("GET /api/grievances", () => {
     await Grievance.create({ grievanceText: "First complaint about roads" });
     await Grievance.create({ grievanceText: "Second complaint about electricity" });
 
-    const res = await request(app).get("/api/grievances");
+    const res = await request(app).get("/api/grievances").set("x-admin-key","test-admin-key");
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveLength(2);
@@ -84,7 +84,7 @@ describe("GET /api/grievances", () => {
     await Grievance.create({ grievanceText: "Complaint one", status: "Submitted" });
     await Grievance.create({ grievanceText: "Complaint two", status: "Resolved" });
 
-    const res = await request(app).get("/api/grievances?status=Resolved");
+    const res = await request(app).get("/api/grievances?status=Resolved").set("x-admin-key","test-admin-key");
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveLength(1);
@@ -95,18 +95,18 @@ describe("GET /api/grievances", () => {
 describe("GET /api/grievances/:id", () => {
   test("returns 404 for a well-formed but non-existent id", async () => {
     const fakeId = new mongoose.Types.ObjectId();
-    const res = await request(app).get(`/api/grievances/${fakeId}`);
+    const res = await request(app).get(`/api/grievances/${fakeId}`).set("x-admin-key","test-admin-key");
     expect(res.statusCode).toBe(404);
   });
 
   test("returns 400 for a malformed id", async () => {
-    const res = await request(app).get("/api/grievances/not-a-valid-id");
+    const res = await request(app).get("/api/grievances/not-a-valid-id").set("x-admin-key","test-admin-key");
     expect(res.statusCode).toBe(400);
   });
 
   test("returns the grievance when it exists", async () => {
     const created = await Grievance.create({ grievanceText: "Pension delayed by 2 months" });
-    const res = await request(app).get(`/api/grievances/${created._id}`);
+    const res = await request(app).get(`/api/grievances/${created._id}`).set("x-admin-key","test-admin-key");
 
     expect(res.statusCode).toBe(200);
     expect(res.body.grievanceText).toBe("Pension delayed by 2 months");
@@ -118,7 +118,7 @@ describe("PATCH /api/grievances/:id/status", () => {
     const created = await Grievance.create({ grievanceText: "Streetlight broken near school" });
 
     const res = await request(app)
-      .patch(`/api/grievances/${created._id}/status`)
+      .patch(`/api/grievances/${created._id}/status`).set("x-admin-key","test-admin-key")
       .send({ status: "In Progress" });
 
     expect(res.statusCode).toBe(200);
@@ -129,7 +129,7 @@ describe("PATCH /api/grievances/:id/status", () => {
     const created = await Grievance.create({ grievanceText: "Garbage not collected" });
 
     const res = await request(app)
-      .patch(`/api/grievances/${created._id}/status`)
+      .patch(`/api/grievances/${created._id}/status`).set("x-admin-key","test-admin-key")
       .send({ status: "Closed" });
 
     expect(res.statusCode).toBe(400);
@@ -138,7 +138,7 @@ describe("PATCH /api/grievances/:id/status", () => {
   test("returns 404 when updating a non-existent grievance", async () => {
     const fakeId = new mongoose.Types.ObjectId();
     const res = await request(app)
-      .patch(`/api/grievances/${fakeId}/status`)
+      .patch(`/api/grievances/${fakeId}/status`).set("x-admin-key","test-admin-key")
       .send({ status: "Resolved" });
 
     expect(res.statusCode).toBe(404);

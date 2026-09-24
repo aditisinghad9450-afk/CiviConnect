@@ -84,7 +84,7 @@ describe("GET /api/grievances/track/:trackingId", () => {
 describe("Status timeline", () => {
   test("updating status appends a timeline entry", async () => {
     const created = await request(app).post("/api/grievances").send({ grievanceText: "Park lights not working at night" });
-    const updated = await request(app).patch(`/api/grievances/${created.body._id}/status`)
+    const updated = await request(app).patch(`/api/grievances/${created.body._id}/status`).set("x-admin-key","test-admin-key")
       .send({ status: "In Progress", note: "Assigned to electrical department" });
     expect(updated.statusCode).toBe(200);
     expect(updated.body.timeline).toHaveLength(2);
@@ -93,8 +93,8 @@ describe("Status timeline", () => {
 
   test("full history is visible through the tracking endpoint", async () => {
     const created = await request(app).post("/api/grievances").send({ grievanceText: "Overflowing bin outside market" });
-    await request(app).patch(`/api/grievances/${created.body._id}/status`).send({ status: "In Progress" });
-    await request(app).patch(`/api/grievances/${created.body._id}/status`).send({ status: "Resolved", note: "Bin cleared" });
+    await request(app).patch(`/api/grievances/${created.body._id}/status`).set("x-admin-key","test-admin-key").send({ status: "In Progress" });
+    await request(app).patch(`/api/grievances/${created.body._id}/status`).set("x-admin-key","test-admin-key").send({ status: "Resolved", note: "Bin cleared" });
 
     const res = await request(app).get(`/api/grievances/track/${created.body.trackingId}`);
     expect(res.body.status).toBe("Resolved");
@@ -103,7 +103,7 @@ describe("Status timeline", () => {
 
   test("an invalid status leaves the timeline untouched", async () => {
     const created = await request(app).post("/api/grievances").send({ grievanceText: "Illegal parking blocking the lane" });
-    const bad = await request(app).patch(`/api/grievances/${created.body._id}/status`).send({ status: "Closed" });
+    const bad = await request(app).patch(`/api/grievances/${created.body._id}/status`).set("x-admin-key","test-admin-key").send({ status: "Closed" });
     expect(bad.statusCode).toBe(400);
     const after = await request(app).get(`/api/grievances/track/${created.body.trackingId}`);
     expect(after.body.timeline).toHaveLength(1);

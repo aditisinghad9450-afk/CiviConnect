@@ -46,7 +46,7 @@ describe("GET /api/grievances/:id (HTTP layer)", () => {
   test("returns 404 with JSON error body when not found", async () => {
     Grievance.findById.mockResolvedValue(null);
 
-    const res = await request(app).get("/api/grievances/64f0000000000000000000aa");
+    const res = await request(app).get("/api/grievances/64f0000000000000000000aa").set("x-admin-key","test-admin-key");
 
     expect(res.statusCode).toBe(404);
     expect(res.body).toHaveProperty("error");

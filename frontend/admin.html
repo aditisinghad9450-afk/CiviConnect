@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard — CivicConnect</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; }
+  body { min-height: 100vh; background: #eef0f6; color: #222; }
+ 
+  header {
+    background: #1a237e; color: #fff; padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  header h1 { font-size: 19px; font-weight: 700; }
+  header .right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  header a { color: #c5cae9; text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  .logout { background: none; border: 1px solid #5c6bc0; color: #c5cae9; padding: 5px 12px;
+    border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .logout:hover { background: #283593; }
+ 
+  main { max-width: 1050px; margin: 0 auto; padding: 22px 16px 50px; }
+ 
+  /* ---- Key gate ---- */
+  .gate { max-width: 420px; margin: 70px auto; background: #fff; padding: 28px;
+    border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+  .gate h2 { color: #1a237e; font-size: 20px; margin-bottom: 6px; }
+  .gate p { font-size: 13px; color: #666; margin-bottom: 18px; line-height: 1.5; }
+  .gate input { width: 100%; padding: 11px 13px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+  .gate input:focus { outline: none; border-color: #1a237e; }
+  .gate button { width: 100%; margin-top: 12px; padding: 11px; background: #1a237e; color: #fff;
+    border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .gate button:hover { background: #303f9f; }
+ 
+  /* ---- Stats ---- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: #fff; padding: 14px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+  .stat .n { font-size: 26px; font-weight: 800; color: #1a237e; }
+  .stat .l { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #888; font-weight: 700; margin-top: 2px; }
+ 
+  /* ---- Toolbar ---- */
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .toolbar select, .toolbar input {
+    padding: 9px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff;
+  }
+  .toolbar button { padding: 9px 16px; background: #1a237e; color: #fff; border: none;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .toolbar button:hover { background: #303f9f; }
+  .toolbar .count { margin-left: auto; font-size: 13px; color: #666; }
+ 
+  /* ---- Cards ---- */
+  .card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .tid { font-family: "Consolas", monospace; font-weight: 700; color: #1a237e; font-size: 14px; letter-spacing: .5px; }
+  .when { font-size: 12px; color: #888; }
+  .text { margin: 10px 0; font-size: 15px; line-height: 1.45; }
+  .tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: #eceff1; color: #455a64; font-weight: 600; }
+  .tag.high { background: #ffebee; color: #c62828; }
+  .tag.medium { background: #fff8e1; color: #ef6c00; }
+  .tag.low { background: #e8f5e9; color: #2e7d32; }
+ 
+  .badge { padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; }
+  .badge.submitted { background: #e8eaf6; color: #1a237e; }
+  .badge.in-progress { background: #fff3e0; color: #e65100; }
+  .badge.resolved { background: #e8f5e9; color: #1b5e20; }
+ 
+  .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    border-top: 1px solid #eee; padding-top: 12px; }
+  .actions select, .actions input { padding: 8px 11px; border: 1px solid #ccc; border-radius: 7px; font-size: 13px; }
+  .actions input { flex: 1; min-width: 160px; }
+  .actions button { padding: 8px 15px; background: #2e7d32; color: #fff; border: none;
+    border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .actions button:hover:not(:disabled) { background: #1b5e20; }
+  .actions button:disabled { background: #a5b6a6; cursor: not-allowed; }
+ 
+  .history { margin-top: 10px; font-size: 12px; color: #777; }
+  .history summary { cursor: pointer; font-weight: 600; color: #1a237e; }
+  .history ul { margin: 8px 0 0 16px; }
+  .history li { margin-bottom: 4px; }
+ 
+  .msg { padding: 13px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
+  .msg.show { display: block; }
+  .msg.error { background: #fdecea; color: #b71c1c; border: 1px solid #f5c6c2; }
+  .msg.info { background: #e8eaf6; color: #1a237e; border: 1px solid #c5cae9; }
+  .msg.ok { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+ 
+  .empty { text-align: center; padding: 40px; color: #888; font-size: 14px; }
+</style>
+</head>
+<body>
+ 
+<!-- Key gate -->
+<div id="gate" class="gate">
+  <h2>Admin Access</h2>
+  <p>Enter the admin key to view and manage grievances. This key is shared by all administrators — it is not a personal login.</p>
+  <input type="password" id="keyInput" placeholder="Admin key" autocomplete="off" />
+  <button id="keyBtn" type="button">Continue</button>
+  <div class="msg error" id="gateMsg" style="margin-top:14px;"></div>
+</div>
+ 
+<!-- Dashboard -->
+<div id="dash" style="display:none;">
+  <header>
+    <h1>CivicConnect — Admin</h1>
+    <div class="right">
+      <a href="index.html">Citizen view</a>
+      <button class="logout" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </header>
+ 
+  <main>
+    <div class="msg" id="msg"></div>
+ 
+    <div class="stats">
+      <div class="stat"><div class="n" id="sTotal">–</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" id="sSubmitted">–</div><div class="l">Submitted</div></div>
+      <div class="stat"><div class="n" id="sProgress">–</div><div class="l">In Progress</div></div>
+      <div class="stat"><div class="n" id="sResolved">–</div><div class="l">Resolved</div></div>
+    </div>
+ 
+    <div class="toolbar">
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option>Submitted</option>
+        <option>In Progress</option>
+        <option>Resolved</option>
+      </select>
+      <input type="text" id="filterCategory" placeholder="Filter by category…" />
+      <button id="refreshBtn" type="button">Refresh</button>
+      <span class="count" id="count"></span>
+    </div>
+ 
+    <div id="list"></div>
+  </main>
+</div>
+ 
+<script>
+  const API_BASE = "https://civiconnect1.onrender.com";
+ 
+  // sessionStorage, not localStorage: the key is cleared when the tab closes.
+  function getKey()      { try { return sessionStorage.getItem("adminKey"); } catch (e) { return null; } }
+  function setKey(k)     { try { sessionStorage.setItem("adminKey", k); } catch (e) {} }
+  function clearKey()    { try { sessionStorage.removeItem("adminKey"); } catch (e) {} }
+ 
+  const gate     = document.getElementById("gate");
+  const dash     = document.getElementById("dash");
+  const gateMsg  = document.getElementById("gateMsg");
+  const msg      = document.getElementById("msg");
+  const list     = document.getElementById("list");
+ 
+  function showMsg(text, type) {
+    msg.textContent = text;
+    msg.className = "msg show " + type;
+  }
+  function hideMsg() { msg.className = "msg"; }
+ 
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
+ 
+  function fmt(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+ 
+  function cls(s) { return (s || "").toLowerCase().replace(/\s+/g, "-"); }
+ 
+  async function api(path, options) {
+    const opts = options || {};
+    opts.headers = Object.assign({}, opts.headers, { "x-admin-key": getKey() || "" });
+    const res = await fetch(API_BASE + path, opts);
+ 
+    if (res.status === 401) {
+      clearKey();
+      showGate("That key was rejected. Please enter a valid admin key.");
+      throw new Error("unauthorized");
+    }
+    return res;
+  }
+ 
+  function showGate(errText) {
+    dash.style.display = "none";
+    gate.style.display = "block";
+    if (errText) {
+      gateMsg.textContent = errText;
+      gateMsg.className = "msg error show";
+    } else {
+      gateMsg.className = "msg error";
+    }
+  }
+ 
+  function showDash() {
+    gate.style.display = "none";
+    dash.style.display = "block";
+  }
+ 
+  function renderStats(items) {
+    document.getElementById("sTotal").textContent     = items.length;
+    document.getElementById("sSubmitted").textContent = items.filter(g => g.status === "Submitted").length;
+    document.getElementById("sProgress").textContent  = items.filter(g => g.status === "In Progress").length;
+    document.getElementById("sResolved").textContent  = items.filter(g => g.status === "Resolved").length;
+  }
+ 
+  function renderList(items) {
+    list.innerHTML = "";
+ 
+    if (!items.length) {
+      list.innerHTML = '<div class="empty">No grievances match these filters.</div>';
+      return;
+    }
+ 
+    items.forEach(function (g) {
+      const card = document.createElement("div");
+      card.className = "card";
+ 
+      const timeline = (g.timeline || []).map(function (e) {
+        return "<li><strong>" + esc(e.status) + "</strong> — " + esc(fmt(e.changedAt)) +
+               (e.note ? "<br><em>" + esc(e.note) + "</em>" : "") + "</li>";
+      }).join("");
+ 
+      card.innerHTML =
+        '<div class="card-top">' +
+          '<div>' +
+            '<div class="tid">' + esc(g.trackingId || "(no tracking ID)") + '</div>' +
+            '<div class="when">' + esc(fmt(g.createdAt)) + '</div>' +
+          '</div>' +
+          '<span class="badge ' + cls(g.status) + '">' + esc(g.status) + '</span>' +
+        '</div>' +
+        '<div class="text">' + esc(g.grievanceText) + '</div>' +
+        '<div class="tags">' +
+          '<span class="tag">' + esc(g.category || "UNCATEGORIZED") + '</span>' +
+          '<span class="tag ' + cls(g.urgency) + '">' + esc(g.urgency) + ' urgency</span>' +
+          '<span class="tag">' + esc(g.populationAffected) + '</span>' +
+          (g.language ? '<span class="tag">' + esc(g.language) + '</span>' : '') +
+        '</div>' +
+        (timeline ? '<details class="history"><summary>Status history (' + (g.timeline || []).length + ')</summary><ul>' + timeline + '</ul></details>' : '') +
+        '<div class="actions">' +
+          '<select data-role="status">' +
+            '<option' + (g.status === "Submitted"   ? " selected" : "") + '>Submitted</option>' +
+            '<option' + (g.status === "In Progress" ? " selected" : "") + '>In Progress</option>' +
+            '<option' + (g.status === "Resolved"    ? " selected" : "") + '>Resolved</option>' +
+          '</select>' +
+          '<input type="text" data-role="note" placeholder="Note for the citizen (optional)" maxlength="300" />' +
+          '<button type="button" data-role="save">Update</button>' +
+        '</div>';
+ 
+      card.querySelector('[data-role="save"]').addEventListener("click", function () {
+        updateStatus(
+          g._id,
+          card.querySelector('[data-role="status"]').value,
+          card.querySelector('[data-role="note"]').value.trim(),
+          this
+        );
+      });
+ 
+      list.appendChild(card);
+    });
+  }
+ 
+  async function load() {
+    hideMsg();
+    list.innerHTML = '<div class="empty">Loading…</div>';
+ 
+    const status   = document.getElementById("filterStatus").value;
+    const category = document.getElementById("filterCategory").value.trim();
+ 
+    const params = new URLSearchParams();
+    if (status)   params.set("status", status);
+    if (category) params.set("category", category);
+    const qs = params.toString() ? "?" + params.toString() : "";
+ 
+    try {
+      const res = await api("/api/grievances" + qs);
+      if (!res.ok) { showMsg("Could not load grievances (" + res.status + ").", "error"); list.innerHTML = ""; return; }
+ 
+      const items = await res.json();
+      renderStats(items);
+      document.getElementById("count").textContent = items.length + " shown";
+      renderList(items);
+    } catch (err) {
+      if (err.message !== "unauthorized") {
+        showMsg("Couldn't reach the server. It may be waking up — try again in a moment.", "error");
+        list.innerHTML = "";
+      }
+    }
+  }
+ 
+  async function updateStatus(id, status, note, btn) {
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+    try {
+      const res = await api("/api/grievances/" + id + "/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: status, note: note || undefined }),
+      });
+ 
+      if (!res.ok) {
+        const body = await res.json().catch(function () { return {}; });
+        showMsg(body.error || "Update failed (" + res.status + ").", "error");
+        return;
+      }
+ 
+      showMsg("Status updated to " + status + ".", "ok");
+      load();
+    } catch (err) {
+      if (err.message !== "unauthorized") showMsg("Couldn't reach the server.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Update";
+    }
+  }
+ 
+  // --- wiring ---
+  document.getElementById("keyBtn").addEventListener("click", function () {
+    const k = document.getElementById("keyInput").value.trim();
+    if (!k) { gateMsg.textContent = "Please enter the admin key."; gateMsg.className = "msg error show"; return; }
+    setKey(k);
+    showDash();
+    load();
+  });
+ 
+  document.getElementById("keyInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") document.getElementById("keyBtn").click();
+  });
+ 
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    clearKey();
+    document.getElementById("keyInput").value = "";
+    showGate();
+  });
+ 
+  document.getElementById("refreshBtn").addEventListener("click", load);
+  document.getElementById("filterStatus").addEventListener("change", load);
+  document.getElementById("filterCategory").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") load();
+  });
+ 
+  // Resume an existing session
+  if (getKey()) { showDash(); load(); }
+</script>
+</body>
+</html>

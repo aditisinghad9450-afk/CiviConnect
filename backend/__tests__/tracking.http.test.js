@@ -48,7 +48,7 @@ describe("GET /api/grievances/track/:trackingId (HTTP layer)", () => {
 
   test("still routes /:id correctly for ordinary ObjectIds", async () => {
     Grievance.findById.mockResolvedValue(null);
-    const res = await request(app).get("/api/grievances/64f0000000000000000000aa");
+    const res = await request(app).get("/api/grievances/64f0000000000000000000aa").set("x-admin-key","test-admin-key");
     expect(res.statusCode).toBe(404);
     expect(Grievance.findById).toHaveBeenCalled();
     expect(Grievance.findOne).not.toHaveBeenCalled();
